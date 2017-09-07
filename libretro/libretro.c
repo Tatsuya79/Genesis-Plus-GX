@@ -2317,10 +2317,14 @@ void retro_run(void)
    if (updated)
       check_variables();
 
-   if (restart_eq) 
+   if (updated)
    {
-      audio_set_equalizer();
-      restart_eq = false;
+      check_variables();
+      if (restart_eq)
+      {
+         audio_set_equalizer();
+         restart_eq = false;
+      }
    }
 }
 
