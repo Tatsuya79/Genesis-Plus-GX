@@ -148,6 +148,10 @@ static char ggvalidchars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
 
 static char arvalidchars[] = "0123456789ABCDEF";
 
+static int low_gain = 0;
+static int mid_gain = 0;
+static int high_gain = 0;
+
 /************************************
  * Genesis Plus GX implementation
  ************************************/
@@ -499,12 +503,12 @@ static void config_default(void)
    config.hq_fm          = 1; /* high-quality FM resampling (slower) */
    config.hq_psg         = 1; /* high-quality PSG resampling (slower) */
    config.filter         = 0; /* no filter */
-   config.lp_range       = 0x4CCC; /* 0.3 in 16.16 fixed point */
+   config.lp_range       = 0x6667; /* 0.6 in 16.16 fixed point */
    config.low_freq       = 880;
    config.high_freq      = 5000;
-   config.lg             = 100.0;
-   config.mg             = 70.0;
-   config.hg             = 50.0;
+   config.lg             = low_gain;
+   config.mg             = mid_gain;
+   config.hg             = high_gain;
    config.dac_bits       = 14; /* MAX DEPTH */ 
    config.ym2413         = 2; /* AUTO */
    config.mono           = 0; /* STEREO output */
@@ -1029,12 +1033,93 @@ static void check_variables(void)
   var.key = "genesis_plus_gx_audio_filter";
   environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
   {
-    if (!strcmp(var.value, "1"))
+    if (!strcmp(var.value, "Lowpass"))
       config.filter = 1;
-    else if (!strcmp(var.value, "2"))
+    else if (!strcmp(var.value, "EQ"))
       config.filter = 2;
     else
       config.filter = 0;
+  }
+	
+  var.key = "genesis_plus_gx_audio_eq_low";
+  environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
+  {
+    if (!strcmp(var.value, "10%"))
+      low_gain = 10;
+    else if (!strcmp(var.value, "20%"))
+      low_gain = 20;
+    else if (!strcmp(var.value, "30%"))
+      low_gain = 30;
+    else if (!strcmp(var.value, "40%"))
+      low_gain = 40;
+    else if (!strcmp(var.value, "50%"))
+      low_gain = 50;
+    else if (!strcmp(var.value, "60%"))
+      low_gain = 60;
+    else if (!strcmp(var.value, "70%"))
+      low_gain = 70;
+    else if (!strcmp(var.value, "80%"))
+      low_gain = 80;
+    else if (!strcmp(var.value, "90%"))
+      low_gain = 90;
+    else if (!strcmp(var.value, "100%"))
+      low_gain = 100;
+    else
+      low_gain = 0;
+  }
+	
+  var.key = "genesis_plus_gx_audio_eq_mid";
+  environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
+  {
+    if (!strcmp(var.value, "10%"))
+      mid_gain = 10;
+    else if (!strcmp(var.value, "20%"))
+      mid_gain = 20;
+    else if (!strcmp(var.value, "30%"))
+      mid_gain = 30;
+    else if (!strcmp(var.value, "40%"))
+      mid_gain = 40;
+    else if (!strcmp(var.value, "50%"))
+      mid_gain = 50;
+    else if (!strcmp(var.value, "60%"))
+      mid_gain = 60;
+    else if (!strcmp(var.value, "70%"))
+      mid_gain = 70;
+    else if (!strcmp(var.value, "80%"))
+      mid_gain = 80;
+    else if (!strcmp(var.value, "90%"))
+      mid_gain = 90;
+    else if (!strcmp(var.value, "100%"))
+      mid_gain = 100;
+    else
+      mid_gain = 0;
+  }
+	
+  var.key = "genesis_plus_gx_audio_eq_high";
+  environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
+  {
+    if (!strcmp(var.value, "10%"))
+      high_gain = 10;
+    else if (!strcmp(var.value, "20%"))
+      high_gain = 20;
+    else if (!strcmp(var.value, "30%"))
+      high_gain = 30;
+    else if (!strcmp(var.value, "40%"))
+      high_gain = 40;
+    else if (!strcmp(var.value, "50%"))
+      high_gain = 50;
+    else if (!strcmp(var.value, "60%"))
+      high_gain = 60;
+    else if (!strcmp(var.value, "70%"))
+      high_gain = 70;
+    else if (!strcmp(var.value, "80%"))
+      high_gain = 80;
+    else if (!strcmp(var.value, "90%"))
+      high_gain = 90;
+    else if (!strcmp(var.value, "100%"))
+      high_gain = 100;
+    else
+      high_gain = 0;
   }
 
   var.key = "genesis_plus_gx_dac_bits";
@@ -1584,7 +1669,10 @@ void retro_set_environment(retro_environment_t cb)
       { "genesis_plus_gx_lock_on", "Cartridge lock-on; disabled|game genie|action replay (pro)|sonic & knuckles" },
       { "genesis_plus_gx_ym2413", "Master System FM; auto|disabled|enabled" },
       { "genesis_plus_gx_dac_bits", "YM2612 DAC quantization; disabled|enabled" },
-      { "genesis_plus_gx_lowpass_filter", "Lowpass filter; disabled|enabled" },
+      { "genesis_plus_gx_audio_filter", "Audio filter; disabled|Lowpass|EQ" },
+      { "genesis_plus_gx_audio_eq_low", "EQ Low; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
+      { "genesis_plus_gx_audio_eq_mid", "EQ Mid; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
+      { "genesis_plus_gx_audio_eq_high", "EQ High; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
       { "genesis_plus_gx_blargg_ntsc_filter", "Blargg NTSC filter; disabled|monochrome|composite|svideo|rgb" },
       { "genesis_plus_gx_lcd_filter", "LCD Ghosting filter; disabled|enabled" },
       { "genesis_plus_gx_overscan", "Borders; disabled|top/bottom|left/right|full" },
