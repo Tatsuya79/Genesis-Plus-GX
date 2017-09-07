@@ -150,6 +150,8 @@ static char ggvalidchars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
 
 static char arvalidchars[] = "0123456789ABCDEF";
 
+#define SOUND_FREQUENCY 44100
+
 /************************************
  * Genesis Plus GX implementation
  ************************************/
@@ -1201,7 +1203,7 @@ static void check_variables(void)
 
   if (reinit)
   {
-    audio_init(44100, 0);
+    audio_init(SOUND_FREQUENCY, 0);
     memcpy(temp, sram.sram, sizeof(temp));
     system_init();
     system_reset();
@@ -1800,6 +1802,7 @@ void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_cb = cb
 void retro_set_input_poll(retro_input_poll_t cb) { input_poll_cb = cb; }
 void retro_set_input_state(retro_input_state_t cb) { input_state_cb = cb; }
 
+
 void retro_get_system_info(struct retro_system_info *info)
 {
    info->library_name = "Genesis Plus GX";
@@ -1820,7 +1823,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    info->geometry.max_height    = 576;
    info->geometry.aspect_ratio  = vaspect_ratio;
    info->timing.fps             = (double)(system_clock) / (double)lines_per_frame / (double)MCYCLES_PER_LINE;
-   info->timing.sample_rate     = 44100;
+   info->timing.sample_rate     = SOUND_FREQUENCY;
 }
 
 void retro_set_controller_port_device(unsigned port, unsigned device)
@@ -2137,7 +2140,7 @@ bool retro_load_game(const struct retro_game_info *info)
       }
    }
 
-   audio_init(44100,0);
+   audio_init(SOUND_FREQUENCY, 0);
    system_init();
    system_reset();
    is_running = false;
@@ -2314,9 +2317,6 @@ void retro_run(void)
    audio_cb(soundbuffer, audio_update(soundbuffer));
 
    environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated);
-   if (updated)
-      check_variables();
-
    if (updated)
    {
       check_variables();
