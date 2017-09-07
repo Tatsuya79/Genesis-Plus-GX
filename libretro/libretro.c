@@ -1040,6 +1040,13 @@ static void check_variables(void)
     else
       config.filter = 0;
   }
+
+  var.key = "genesis_plus_gx_lowpass_range";
+  environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
+  {
+    /* Sloppy Float to Q16.16 conversion */
+    config.lp_range = (int) (atof(var.value) * 65536);
+  } 
 	
   var.key = "genesis_plus_gx_audio_eq_low";
   environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
@@ -1670,6 +1677,7 @@ void retro_set_environment(retro_environment_t cb)
       { "genesis_plus_gx_ym2413", "Master System FM; auto|disabled|enabled" },
       { "genesis_plus_gx_dac_bits", "YM2612 DAC quantization; disabled|enabled" },
       { "genesis_plus_gx_audio_filter", "Audio filter; disabled|Lowpass|EQ" },
+      { "genesis_plus_gx_lowpass_range", "Lowpass range; 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9"},
       { "genesis_plus_gx_audio_eq_low", "EQ Low; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
       { "genesis_plus_gx_audio_eq_mid", "EQ Mid; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
       { "genesis_plus_gx_audio_eq_high", "EQ High; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
