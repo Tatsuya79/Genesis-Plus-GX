@@ -499,12 +499,12 @@ static void config_default(void)
    config.hq_fm          = 1; /* high-quality FM resampling (slower) */
    config.hq_psg         = 1; /* high-quality PSG resampling (slower) */
    config.filter         = 0; /* no filter */
-   config.lp_range       = 0x9999; /* 0.6 in 16.16 fixed point */
+   config.lp_range       = 0x4CCC; /* 0.3 in 16.16 fixed point */
    config.low_freq       = 880;
    config.high_freq      = 5000;
-   config.lg             = 1.0;
-   config.mg             = 1.0;
-   config.hg             = 1.0;
+   config.lg             = 100.0;
+   config.mg             = 70.0;
+   config.hg             = 50.0;
    config.dac_bits       = 14; /* MAX DEPTH */ 
    config.ym2413         = 2; /* AUTO */
    config.mono           = 0; /* STEREO output */
@@ -1026,11 +1026,13 @@ static void check_variables(void)
     }
   }
 	
-  var.key = "genesis_plus_gx_lowpass_filter";
+  var.key = "genesis_plus_gx_audio_filter";
   environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
   {
-    if (!strcmp(var.value, "enabled"))
+    if (!strcmp(var.value, "1"))
       config.filter = 1;
+    else if (!strcmp(var.value, "2"))
+      config.filter = 2;
     else
       config.filter = 0;
   }
