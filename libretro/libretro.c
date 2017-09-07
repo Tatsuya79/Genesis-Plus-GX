@@ -114,6 +114,8 @@ static uint8_t temp[0x10000];
 static int16 soundbuffer[3068];
 static uint16_t bitmap_data_[720 * 576];
 
+static bool restart_eq = false;
+
 static char g_rom_dir[256];
 static char g_rom_name[256];
 static char *save_dir;
@@ -147,10 +149,6 @@ static uint8_t cheatIndexes[MAX_CHEATS];
 static char ggvalidchars[] = "ABCDEFGHJKLMNPRSTVWXYZ0123456789";
 
 static char arvalidchars[] = "0123456789ABCDEF";
-
-static int low_gain = 0;
-static int mid_gain = 0;
-static int high_gain = 0;
 
 /************************************
  * Genesis Plus GX implementation
@@ -506,9 +504,9 @@ static void config_default(void)
    config.lp_range       = 0x6667; /* 0.6 in 16.16 fixed point */
    config.low_freq       = 880;
    config.high_freq      = 5000;
-   config.lg             = low_gain;
-   config.mg             = mid_gain;
-   config.hg             = high_gain;
+   config.lg             = 100.0;
+   config.mg             = 100.0;
+   config.hg             = 100.0;
    config.dac_bits       = 14; /* MAX DEPTH */ 
    config.ym2413         = 2; /* AUTO */
    config.mono           = 0; /* STEREO output */
@@ -1051,82 +1049,26 @@ static void check_variables(void)
   var.key = "genesis_plus_gx_audio_eq_low";
   environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
   {
-    if (!strcmp(var.value, "10%"))
-      low_gain = 10;
-    else if (!strcmp(var.value, "20%"))
-      low_gain = 20;
-    else if (!strcmp(var.value, "30%"))
-      low_gain = 30;
-    else if (!strcmp(var.value, "40%"))
-      low_gain = 40;
-    else if (!strcmp(var.value, "50%"))
-      low_gain = 50;
-    else if (!strcmp(var.value, "60%"))
-      low_gain = 60;
-    else if (!strcmp(var.value, "70%"))
-      low_gain = 70;
-    else if (!strcmp(var.value, "80%"))
-      low_gain = 80;
-    else if (!strcmp(var.value, "90%"))
-      low_gain = 90;
-    else if (!strcmp(var.value, "100%"))
-      low_gain = 100;
-    else
-      low_gain = 0;
+    uint8_t new_lg = atoi(var.value);
+    if (new_lg != (int) config.lg) restart_eq = true;
+    config.lg = new_lg;
   }
 	
   var.key = "genesis_plus_gx_audio_eq_mid";
   environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
   {
-    if (!strcmp(var.value, "10%"))
-      mid_gain = 10;
-    else if (!strcmp(var.value, "20%"))
-      mid_gain = 20;
-    else if (!strcmp(var.value, "30%"))
-      mid_gain = 30;
-    else if (!strcmp(var.value, "40%"))
-      mid_gain = 40;
-    else if (!strcmp(var.value, "50%"))
-      mid_gain = 50;
-    else if (!strcmp(var.value, "60%"))
-      mid_gain = 60;
-    else if (!strcmp(var.value, "70%"))
-      mid_gain = 70;
-    else if (!strcmp(var.value, "80%"))
-      mid_gain = 80;
-    else if (!strcmp(var.value, "90%"))
-      mid_gain = 90;
-    else if (!strcmp(var.value, "100%"))
-      mid_gain = 100;
-    else
-      mid_gain = 0;
+    uint8_t new_mg = atoi(var.value);
+    if (new_mg != (int) config.mg) restart_eq = true;
+    config.mg = new_mg;
   }
 	
   var.key = "genesis_plus_gx_audio_eq_high";
   environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
   {
-    if (!strcmp(var.value, "10%"))
-      high_gain = 10;
-    else if (!strcmp(var.value, "20%"))
-      high_gain = 20;
-    else if (!strcmp(var.value, "30%"))
-      high_gain = 30;
-    else if (!strcmp(var.value, "40%"))
-      high_gain = 40;
-    else if (!strcmp(var.value, "50%"))
-      high_gain = 50;
-    else if (!strcmp(var.value, "60%"))
-      high_gain = 60;
-    else if (!strcmp(var.value, "70%"))
-      high_gain = 70;
-    else if (!strcmp(var.value, "80%"))
-      high_gain = 80;
-    else if (!strcmp(var.value, "90%"))
-      high_gain = 90;
-    else if (!strcmp(var.value, "100%"))
-      high_gain = 100;
-    else
-      high_gain = 0;
+    uint8_t new_hg = atoi(var.value);
+    if (new_hg != config.hg) restart_eq = true;
+    config.hg = new_hg;
+
   }
 
   var.key = "genesis_plus_gx_dac_bits";
@@ -1678,9 +1620,9 @@ void retro_set_environment(retro_environment_t cb)
       { "genesis_plus_gx_dac_bits", "YM2612 DAC quantization; disabled|enabled" },
       { "genesis_plus_gx_audio_filter", "Audio filter; disabled|Lowpass|EQ" },
       { "genesis_plus_gx_lowpass_range", "Lowpass range; 0.1|0.2|0.3|0.4|0.5|0.6|0.7|0.8|0.9"},
-      { "genesis_plus_gx_audio_eq_low", "EQ Low; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
-      { "genesis_plus_gx_audio_eq_mid", "EQ Mid; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
-      { "genesis_plus_gx_audio_eq_high", "EQ High; 100%|0%|10%|20%|30%|40%|50%|60%|70%|80%|90%" },
+      { "genesis_plus_gx_audio_eq_low", "EQ Low; 100|0|10|20|30|40|50|60|70|80|90" },
+      { "genesis_plus_gx_audio_eq_mid", "EQ Mid; 100|0|10|20|30|40|50|60|70|80|90" },
+      { "genesis_plus_gx_audio_eq_high", "EQ High; 100|0|10|20|30|40|50|60|70|80|90" },
       { "genesis_plus_gx_blargg_ntsc_filter", "Blargg NTSC filter; disabled|monochrome|composite|svideo|rgb" },
       { "genesis_plus_gx_lcd_filter", "LCD Ghosting filter; disabled|enabled" },
       { "genesis_plus_gx_overscan", "Borders; disabled|top/bottom|left/right|full" },
@@ -2374,6 +2316,12 @@ void retro_run(void)
    environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated);
    if (updated)
       check_variables();
+
+   if (restart_eq) 
+   {
+      audio_set_equalizer();
+      restart_eq = false;
+   }
 }
 
 #undef  CHUNKSIZE
