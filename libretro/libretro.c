@@ -2317,8 +2317,11 @@ void retro_run(void)
    if (updated)
       check_variables();
 
-   if (restart_eq)
+   if (restart_eq) 
+   {
       audio_set_equalizer();
+      restart_eq = false;
+   }
 }
 
 #undef  CHUNKSIZE
